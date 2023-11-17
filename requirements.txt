@@ -1,0 +1,2 @@
+# MoviePy for video editing
+moviepy==1.0.3
