@@ -1,18 +1,29 @@
 import os
 from moviepy.editor import VideoFileClip
+from datetime import datetime
 
 CLIPS_PATH = os.getenv('APPDATA') + '\\Medal\\store\\clips.json'
-OUT_DIR = 'Clips'
+OUT_DIR = os.path.curdir + '\\' + 'Clips'+ '\\'
 BUFFER = 5
 
 class AutoClipper:
     def __init__(self, CLIPS_PATH):
         self.CLIPS_PATH = CLIPS_PATH
+        self.processed = 0
+        self.startTime = datetime.now()
 
     def run(self):
         self.loadJson()
-        self.processData()
-    
+        #self.processData()
+        print('\nDone!\nProcessed Files: ' + str(self.processed))
+        time_difference = datetime.now() - self.startTime
+
+        # Calculate hours, minutes, and seconds
+        hours, remainder = divmod(time_difference.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        formatted_time_difference = "{}:{}:{}".format(hours, minutes, seconds)
+        print(f"Duration: {formatted_time_difference}")
+        
     def loadJson(self):
         # Python program to read json file
         import json
@@ -31,9 +42,9 @@ class AutoClipper:
         for clipId, clipData in self.data.items():
             if(clipData.get('bookmarks')):
                 self.processClip(clipData)
+                self.processed += 1
     
     def processClip(self, clipData):
-
         # Load Video Clip from clipData.FilePath
         filepath = clipData['FilePath']
         paths = filepath.split('\\')
@@ -50,7 +61,7 @@ class AutoClipper:
             clipped_clip = video_clip.subclip(start, end)
             
             # Save video to /out
-            clipped_clip.write_videofile(os.path.curdir + '\\' + OUT_DIR + '\\' + videoName.replace('.mp4', '_edit.mp4'), codec='libx264', audio_codec='aac')
+            clipped_clip.write_videofile(OUT_DIR + videoName.replace('.mp4', '_edit.mp4'), codec='libx264', audio_codec='aac')
 
             # Close the video clip
             video_clip.close()
